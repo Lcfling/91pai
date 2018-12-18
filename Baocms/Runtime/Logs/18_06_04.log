@@ -1,0 +1,7 @@
+[ 2018-06-04T21:10:16+08:00 ] 127.0.0.1 /
+NOTIC: [2] preg_replace(): The /e modifier is no longer supported, use preg_replace_callback instead /Volumes/task/jinrong/Core/Common/common.php 第 217 行.
+INFO: [ app_begin ] --START--
+INFO: ReadHtmlCache Behavior ::run [ RunTime:0.001061s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.001177s ]
+NOTIC: [2] session_set_save_handler(): Argument 1 is not a valid callback /Volumes/task/jinrong/Core/Common/functions.php 第 572 行.
+
