@@ -1,6 +1,4 @@
 <?php
-
-
 class JiuyiAction extends CommonAction
 //class JiuyiAction extends Action
 {
