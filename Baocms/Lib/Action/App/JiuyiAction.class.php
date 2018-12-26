@@ -101,8 +101,7 @@ class JiuyiAction extends CommonAction
                 //竞拍记录入库
                 $jiuyi->setauctionrecorddata($this->uid,$periods_id,$auction_money,1);
                 //扣用户金额
-                $users->reducemoney($this->uid,$auction_money,92,1,"竞拍成功");
-
+                $users->reducemoney($this->uid,$strike_price,92,1,"竞拍成功");
                 //生成一个新的期数
                 $jiuyi->createauction($periods_id);
                 //更改竞拍状态
