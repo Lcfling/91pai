@@ -131,6 +131,7 @@ class JiuyiAction extends CommonAction
      * @return
      */
     public function addgoods(){
+
         //创建库存-3
         $data['goods_name']='测试商品';$data['goods_header']='测试商品测试商品测试商品测试商品测试商品';$data['goods_img']='图片';$data['strike_price']='15000';$data['auction_price']='5000';
         $data['buyback_price']='2000';$data['auction_num']='10';$data['inventory_num']='100';$data['sold_out']='1';$data['creatime']=time();
