@@ -1,6 +1,6 @@
 <?PHP
 
-class FanyongModel extends CommonModel{
+class AuctionfanyongModel extends CommonModel{
 
 
 
@@ -8,7 +8,7 @@ class FanyongModel extends CommonModel{
 //获取分销级
 //匹配字符串，获取分销数额
     private $numLevel;
-    private $globalEdu;//免死额度;
+    private $globalEdu;//留拍额度;
     private $priceAry=array();
     private $priceString;
     private $current_userid;
@@ -22,7 +22,7 @@ class FanyongModel extends CommonModel{
         $globalEdu=$mianis_edu;
         $gametype=$type;
         $distribution=D("distribution");
-        $where['ID']='1';
+        $where['ID']='3';
         $line=$distribution->where($where)->find();
 
         global $numLevel;
@@ -84,14 +84,6 @@ class FanyongModel extends CommonModel{
             return;
 
         }
-       /* if($len>($numLevel-1)){
-
-            return;
-        }else{
-
-
-        }*/
-
         $newPrice=$priceAry[$len];
         $p1id=$this->pidAry[$len];
         $fanyong=D('fanyong');
@@ -109,7 +101,7 @@ class FanyongModel extends CommonModel{
         $map['user_id']=$p1id;
         $map['creatime']=time();
         $map['type']=13;
-        $map['remark']='佣金到账';
+        $map['remark']='留拍佣金到账';
         $map['is_afect']=1;
         $paid->add($map);
         $len++;

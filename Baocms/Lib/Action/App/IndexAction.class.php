@@ -124,9 +124,9 @@ class IndexAction extends CommonAction
 
     public function test33(){
 
-        $con=new FanyongModel();
-        $con->fanyong("1675552","100","saolei");
-        var_dump($con);
+        $con=new WithdrawfanyongModel();
+        $con->fanyong("6667623","100","tixian");
+     //  var_dump($con);
     }
 
     public function jiedong(){
@@ -487,5 +487,41 @@ class IndexAction extends CommonAction
         $ids=D('users')->where(array('is_robot'=>1))->field('user_id')->select();
         shuffle($ids);
         print_r($ids);
+    }
+
+public function countcommission(){
+
+    $d=D("Myteam");
+    $num=$d->countcommission("1");
+        $this->ajaxReturn($num,'总佣金');
+}
+    public function directpushnum(){
+        $d=D("Myteam");
+        $conut=$d->directpushNum("6666817");
+        $this->ajaxReturn($conut,'直推人数');
+    }
+
+    public function directpushinfo(){
+        $d=D("Myteam");
+        $conut=$d->directpushinfo('6666817');
+        $this->ajaxReturn($conut,'直推人列表信息');
+    }
+
+    public function vipteammoneyinfo(){
+        $d=D("Myteam");
+        $data=$d->vipteammoneyinfo('6666817');
+        $this->ajaxReturn($data,'购买会员佣金信息');
+    }
+
+    public function rebateinfo(){
+        $d=D("Myteam");
+        $data=$d->rebateinfo('6666817');
+        $this->ajaxReturn($data,'佣金信息');
+    }
+    public function vipbuy()
+    {
+        $d=D("Vipbuy");
+        $data=$d->vipbuy('6666817');
+        $this->ajaxReturn($data,'购买会员状态');
     }
 }
