@@ -335,6 +335,19 @@ class UsersModel extends CommonModel
         $where['user_id']=$user_id;
         $list=$user->where($where)->find();
 
+        // 判断是否是会员
+        if ($list['vip'] == 1){
+            $rate=0.05;
+        }else{
+            $rate=0.01;
+        }
+
+
+
+
+
+
+
         $tixian=D('Tixian');
         $data['user_id']=$user_id;
         $data['money']=$money*100;
@@ -342,16 +355,25 @@ class UsersModel extends CommonModel
         $data['user_name']=" ";
         $data['time']=time();
         $data['status']=0;
-        $data['rate']=($money*0.01*100);
+        $data['rate']=($money*$rate*100);
         $tixian->add($data);
 
+
+
+
+
         $paid=D('Paid');
-        $paid_data['money']=-($money*100+($money*0.01*100));
+        $paid_data['money']=-($money*100+($money*$rate*100));
         $paid_data['user_id']=$user_id;
         $paid_data['creatime']=time();
         $paid_data['type']=3;
         $paid_data['remark']="用户提现";
         $paid->add($paid_data);
+
+        // 提现返佣
+
+        $fanyong= D("Withdrawfanyong");
+        $fanyong->fanyong($user_id,$money*$rate*100,"tixian");
 
 
         $data1['msg']="提现成功";
@@ -404,7 +426,6 @@ class UsersModel extends CommonModel
 
         //收益明细
 
-
         if($lastid>0){
             $where['ID']=array('lt',$lastid);
         }
@@ -454,6 +475,156 @@ class UsersModel extends CommonModel
             return false;
         }
     }
+
+    //查询收货地址
+    public function site($user_id){
+      $dizhi=M("dizhi");
+      $where['user_id']=$user_id;
+      $data=$dizhi->where($where)->find();
+      if ($data){
+          return $data;
+      }else{
+          return false;
+      }
+    }
+    //添加收货地址
+    public function addsite($user_id,$user_name,$mobile,$user_site){
+        $dizhi=M("dizhi");
+        $data['user_id']=$user_id;
+        $data['name']=$user_name;
+        $data['mobile']=$mobile;
+        $data['site']=$user_site;
+         $id=$dizhi->add($data);
+        if ($id){
+            $dizhi=M("dizhi");
+            $where['id']=$id;
+            $where['user_id']=$user_id;
+           $dizhi_data= $dizhi->where($where)->find();
+            return $dizhi_data;
+        }else{
+            return false;
+        }
+
+    }
+    //修改收货地址
+    public function savesite($user_id,$user_name,$mobile,$user_site,$id){
+        $dizhi=M("dizhi");
+        $where['user_id']=$user_id;
+        $where['id']=$id;
+        $save['user_name']=$user_name;
+        $save['mobile']=$mobile;
+        $save['user_site']=$user_site;
+        $status=$dizhi->where($where)->save($save);
+       
+        if ($status){
+            $dizhi=M("dizhi");
+            $where['id']=$id;
+            $where['user_id']=$user_id;
+            $dizhi_data= $dizhi->where($where)->find();
+            return $dizhi_data;
+
+        }else{
+            return false;
+        }
+
+    }
+    // 删除收货地址
+    public function delsite($user_id,$id){
+        $dizhi=M("dizhi");
+        $where['user_id']=$user_id;
+        $where['id']=$id;
+        $id=$dizhi->where($where)->delete();
+        if ($id){
+            return $id;
+        }else{
+            return false;
+        }
+    }
+
+     //  修改商品状态
+    public function save_shangpin($user_id,$goods_id,$type){
+        $periods= M("periods");
+        $where['user_id']=$user_id;
+        $where['goods_id']=$goods_id;
+        $save['ship_status']=$type;
+        $status=$periods->where($where)->save($save);
+        if ($status){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    //添加回购记录
+    public function huigou_record($user_id,$goods_id){
+
+                // 获取商品信息
+               $goods=M("goods");
+               $where['id']=$goods_id;
+               $goods_data=$goods->where($where)->find();
+                //获取商品详情
+                $periods= M("periods");
+                $where['goods_id']=$goods_id;
+                $periods_data=$periods->where($where)->find();
+               //添加回购记录
+               $huigou=M("huigou_record");
+               $data['user_id']=$user_id;
+               $data['periods_id']=$periods_data['periods_id'];
+               $data['goods_id']=$goods_data['goods_id'];
+               $data['goods_name']=$goods_data['goods_name'];
+               $data['goods_img']=$goods_data['goods_img'];
+               $data['money']=$goods_data['buyback_price'];
+               $data['creatime']=time();
+               $huigou->add($data);
+
+               if ($this->addmoney($user_id,$goods_data['buyback_price'],91,1,'商品回购')){
+                   return true;
+               }else{
+                   return false;
+               }
+
+    }
+
+    // 添加发货操作
+    public function fahuo_record($user_id,$goods_id){
+        // 获取商品信息
+        $goods=M("goods");
+        $goods_where['id']=$goods_id;
+        $goods_data=$goods->where($goods_where)->find();
+
+        //获取商品详情
+        $periods= M("periods");
+        $periods_where['goods_id']=$goods_id;
+        $periods_data=$periods->where($periods_where)->find();
+
+        //获取收货地址
+        $dizhi=M("dizhi");
+        $dizhi_where['user_id']=$user_id;
+        $dizhi_data=$dizhi->where($dizhi_where)->find();
+
+
+        //添加发货记录
+        $fahuo=M("fahuo_record");
+        $data['user_id']=$user_id;
+        $data['periods_id']=$periods_data['id'];
+        $data['goods_id']=$goods_id;
+        $data['goods_name']=$goods_data['goods_name'];
+        $data['goods_img']=$goods_data['goods_img'];
+        $data['name']=$dizhi_data['name'];
+        $data['mobile']=$dizhi_data['mobile'];
+        $data['ship_site']=$dizhi_data['site'];
+        $data['creatime']=time();
+        if ( $fahuo->add($fahuo)){
+             return true;
+        }else{
+            return false;
+        }
+
+
+
+    }
+
+
 
 
 }
