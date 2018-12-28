@@ -57,7 +57,6 @@ class JiuyiAction extends CommonAction
         }
         //获得随机期数
         $periods_id = $this->getperiodid($goods_id,$goodsdata['creatime']);
-        //print_r($periods_id);
         if(empty($periods_id)){
             $this->ajaxReturn('','商品不存在!',0);
         }
