@@ -1,6 +1,5 @@
 <?php
 class JiuyiAction extends CommonAction
-//class JiuyiAction extends Action
 {
 
     /**竞拍展示
@@ -62,7 +61,6 @@ class JiuyiAction extends CommonAction
         if(empty($periods_id)){
             $this->ajaxReturn('','商品不存在!',0);
         }
-        //$this->ajaxReturn($periods_id,'随机期数!',0);
         //竞拍商品是否已被竞拍
         $auctionstatus = $jiuyi->auctioncheck($periods_id);
         if($auctionstatus==2){
@@ -85,7 +83,6 @@ class JiuyiAction extends CommonAction
         }
         //将事先每期产品生成的几次能竞拍成功的次数列表第一个数给取出出队
         $periodsnum=$jiuyi->getperiodsnum($periods_id);//竞拍金额
-        //$list  =Cac()->lRange('jiuyi_auction_list_26',0,-1);
         if($auction_money != $periodsnum){
             $info['type']=5;
             $info['remark']='竞拍金额不对!';
@@ -133,16 +130,16 @@ class JiuyiAction extends CommonAction
      * @param auction_money 每次竞拍金额
      * @return
      */
-    public function addgoods(){
-
-        //创建库存-3
-        $data['goods_name']='测试商品';$data['goods_header']='测试商品测试商品测试商品测试商品测试商品';$data['goods_img']='图片';$data['strike_price']='15000';$data['auction_price']='5000';
-        $data['buyback_price']='2000';$data['auction_num']='10';$data['inventory_num']='100';$data['sold_out']='1';$data['creatime']=time();
-        //D('Jiuyi')->creategoods($data);
-        print_r(unserialize(Cac()->get('jiuyi_auction_43')));
-        print_r(Cac()->get('jiuyi_periods_num_43'));
-        print_r(Cac()->lrange('jiuyi_auction_list_74',0,-1));
-    }
+//    public function addgoods(){
+//
+//        //创建库存-3
+//        $data['goods_name']='测试商品';$data['goods_header']='测试商品测试商品测试商品测试商品测试商品';$data['goods_img']='图片';$data['strike_price']='15000';$data['auction_price']='5000';
+//        $data['buyback_price']='2000';$data['auction_num']='10';$data['inventory_num']='100';$data['sold_out']='1';$data['creatime']=time();
+//        //D('Jiuyi')->creategoods($data);
+//        print_r(unserialize(Cac()->get('jiuyi_auction_43')));
+//        print_r(Cac()->get('jiuyi_periods_num_43'));
+//        print_r(Cac()->lrange('jiuyi_auction_list_74',0,-1));
+//    }
     /**竞拍成功商品期数展示详细
      * @param goods_id 商品id
      * @return
