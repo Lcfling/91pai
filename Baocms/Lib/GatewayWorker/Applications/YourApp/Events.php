@@ -18,7 +18,6 @@
  * 然后观察一段时间workerman.log看是否有process_timeout异常
  */
 //declare(ticks=1);
-
 use \GatewayWorker\Lib\Gateway;
 use Workerman\Lib\Timer;
 require_once ROOT_PATH."mysql-master/src/Connection.php";
