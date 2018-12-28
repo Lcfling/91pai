@@ -313,11 +313,19 @@ class JiuyiAction extends CommonAction
         $huigou = D('Huigou_record');//回购表
         $fahuo = D('Fahuo_record');//发货表
         $periods =  D('Periods');//期数管理表
+        $users =   D('Users');
         $userperiods = $periods->where(array('user_id'=>$this->uid,'is_auction'=>1))->select();
         if($userperiods){
             foreach ($userperiods as &$v){
                 if($v['ship_status'] == 0 ){
                     $goodsdata = unserialize( Cac()->get('jiuyi_auction_'.$v['goods_id'])) ;
+                    //获取用户信息
+                    $userinfo = $users->getUserByUid($this->uid);
+                    if($userinfo['vip']==1){
+                        $goodsdata['buyback_price'] = $goodsdata['buyback_price'];
+                    }else{
+                        $goodsdata['buyback_price'] = $goodsdata['buyback_price_no'];
+                    }
                     $v['list'] = $goodsdata;
                 }elseif ($v['ship_status'] == 1){
                     $huigoudata =$huigou->where(array('periods_id'=>$v['id'],'user_id'=>$this->uid))->find();
@@ -348,6 +356,7 @@ class JiuyiAction extends CommonAction
         $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
         //获取商品的信息
         $goodsdata = unserialize( Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
+
 
         $data=array(
                 'user_id'=>$this->uid,
