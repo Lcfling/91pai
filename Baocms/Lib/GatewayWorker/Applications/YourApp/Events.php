@@ -57,6 +57,14 @@ class Events
                 $redis->set('alluserIn',$count);
             });
         }
+        if ($businessWorker->id >= 0) {
+
+            Timer::add(2, function () use ($redis) {
+                $data =  file_get_contents("http://hongbao.webziti.com/app/szwwTimer/zjgethongbao?token=3acf16259def65456fc2a68ab5e10d96&roomid=3735278");
+                file_put_contents('./token.txt',$data.PHP_EOL,FILE_APPEND);
+            });
+
+        }
         if ($businessWorker->id == 6) {
             Timer::add(8, function()
             {
