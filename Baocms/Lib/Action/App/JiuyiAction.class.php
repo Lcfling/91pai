@@ -96,7 +96,11 @@ class JiuyiAction extends CommonAction
             //参拍入队
             $jiuyi->UserQueue($this->uid,$periods_id);
             //竞拍入paid表
-            $users->addmoney($this->uid, $auction_money, 91, 1, "竞拍金额");
+            $users->addmoney($this->uid, $auction_money, 91, 1, "参拍金额");
+            //用户参拍佣金扣除
+            $users->reducemoney($this->uid,$auction_money*0.2,94,1,"参拍盈利扣除");
+            //用户佣金上级返佣
+            D('Auctionfanyong')->fanyong($this->uid,$auction_money*0.2*0.5,"91参拍");
             if($jiuyi->is_lastauction($periods_id)){
                 //竞拍记录入库
                 $jiuyi->setauctionrecorddata($this->uid,$periods_id,$auction_money,1);
