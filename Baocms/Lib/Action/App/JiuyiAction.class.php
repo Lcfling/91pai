@@ -314,7 +314,7 @@ class JiuyiAction extends CommonAction
         $fahuo = D('Fahuo_record');//发货表
         $periods =  D('Periods');//期数管理表
         $users =   D('Users');
-        $userperiods = $periods->where(array('user_id'=>$this->uid,'is_auction'=>1))->select();
+        $userperiods = $periods->where(array('user_id'=>$this->uid,'is_auction'=>1))->order('creatime desc')->select();
         if($userperiods){
             foreach ($userperiods as &$v){
                 if($v['ship_status'] == 0 ){
