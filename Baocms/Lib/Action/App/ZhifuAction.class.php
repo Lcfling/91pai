@@ -21,6 +21,9 @@ class ZhifuAction extends CommonAction{
         );
     }
 
+    public function ins(){
+        echo "111";
+    }
     public function index(){
 
         $money=(int)$_POST['money'];  //支付金额

@@ -66,6 +66,7 @@ class UcenterAction extends CommonAction {
         $data=$user->sum_money($user_id);
         $this->ajaxReturn($data,'我的收益');
     }
+
     //todo 提现 1
     public function tx(){
         $user_id=$this->uid;
@@ -173,6 +174,7 @@ class UcenterAction extends CommonAction {
         }
         return $i;
     }
+
     //todo 修改个人资料（只允许修改头像 昵称）
     public function set_userinfo(){
 
@@ -221,6 +223,7 @@ class UcenterAction extends CommonAction {
         }
 
     }
+
     public function avatar(){
 
         $avatar=M('avatar');
@@ -333,6 +336,7 @@ class UcenterAction extends CommonAction {
         }
     }
 
+
     //todo 设置支付密码
     public function pay_pwd(){
         $user_id=$this->uid;
@@ -362,6 +366,7 @@ class UcenterAction extends CommonAction {
             $this->ajaxReturn(null,"设置失败",0);
         }
     }
+
     //todo 解除支付密码
     public function set_paypwd(){
         $user_id=$this->uid;
@@ -596,5 +601,114 @@ class UcenterAction extends CommonAction {
         $where['cate_id']=3;
         $data=$cate->where($where)->order(array('article_id'=>'desc'))->limit(1)->select();
         $this->ajaxReturn($data,'公告');
+    }
+
+    //todo 回购
+
+    public function huishou(){
+
+        $user_id=$this->uid;
+        $goods_id=(int)$_POST['goods_id'];
+
+
+        if ($goods_id == "" ){
+            $this->ajaxReturn(null,"数据异常请检查!",0);
+        }
+
+        // 更改商品操作状态.
+        $users= D('Users');
+        $users->save_shangpin($user_id,$goods_id,1);
+
+        // 添加回购记录
+         $huigou=$users->huigou_record($user_id,$goods_id);
+
+        //添加用户金额
+        if ($huigou){
+            $this->ajaxReturn($huigou,"回购成功!");
+        }
+    }
+
+    // todo 发货
+    public function  fahuo(){
+        $user_id=$this->uid;
+        $goods_id=(int)$_POST['goods_id'];
+
+        // 更改商品操作状态.
+        $users= D('Users');
+        $users->save_shangpin($user_id,$goods_id,2);
+
+        //添加发货记录
+         $fahuo=$users->fahuo_record($user_id,$goods_id);
+
+        if ($fahuo){
+            $this->ajaxReturn($fahuo,"发货成功!");
+        }
+
+    }
+
+
+    //todo 查询收货地址
+    public function site(){
+        $user_id=$this->uid;
+        $users= D('Users');
+        $site=$users->site($user_id);
+        if ($site){
+            $this->ajaxReturn($site,"收货地址!");
+        }else{
+            $this->ajaxReturn(null,"没有收货地址!",0);
+        }
+    }
+
+
+    //todo  添加收货地址
+    public function add_site(){
+
+        $user_id=$this->uid;
+        $mobile=(int)$_POST['mobile'];
+        $user_name=I('post.name','','strip_tags');
+        $user_site=I('post.site','','strip_tags');
+
+        $users= D('Users');
+
+
+
+
+        $site=$users->addsite($user_id,$user_name,$mobile,$user_site);
+        if ($site ){
+            $this->ajaxReturn($site,"添加成功!");
+        }else{
+            $this->ajaxReturn($site,"添加失败!",0);
+        }
+
+    }
+
+    //todo 修改收货地址
+    public function save_site(){
+        $user_id=$this->uid;
+        $id=(int)$_POST['id'];
+        $mobile=(int)$_POST['mobile'];
+        $user_name=I('post.name','','strip_tags');
+        $user_site=I('post.site','','strip_tags');
+
+        $users= D('Users');
+        $site=$users->savesite($user_id,$user_name,$mobile,$user_site,$id);
+        if ($site){
+            $this->ajaxReturn($site,"修改成功!");
+        }else{
+            $this->ajaxReturn(null,"修改失败!",0);
+        }
+    }
+
+    //todo 删除收货地址
+    public function del_site(){
+        $user_id=$this->uid;
+        $id=(int)$_POST['id'];
+        $users= D('Users');
+        $site=$users->delsite($user_id,$id);
+        if ($site){
+            $this->ajaxReturn($site,"删除成功!");
+        }else{
+            $this->ajaxReturn($site,"删除失败!",0);
+        }
     }
 }

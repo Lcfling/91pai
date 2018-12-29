@@ -349,7 +349,7 @@ class SzwwAction extends CommonAction{
      */
     private function sendnotify($hb,$userinfo)
     {
-        Gateway::$registerAddress = '127.0.0.1:1238';
+        Gateway::$registerAddress = '116.140.34.55:1238';
         if($userinfo['face']==''){
             $userinfo['face']="img/avatar.png";
         }
@@ -379,7 +379,7 @@ class SzwwAction extends CommonAction{
      */
 
     private function benotify($hb,$userinfo){
-        Gateway::$registerAddress = '127.0.0.1:1238';
+        Gateway::$registerAddress = '116.140.34.55:1238';
         if($userinfo['face']==''){
             $userinfo['face']="img/avatar.png";
         }
@@ -403,7 +403,7 @@ class SzwwAction extends CommonAction{
      * @param $hb  大红包信息
      */
     private function szwwgetlistsend($hb,$getlist,$userinfo,$getlistnum){
-        Gateway::$registerAddress = '127.0.0.1:1238';
+        Gateway::$registerAddress = '116.140.34.55:1238';
         if($userinfo['face']==''){
             $userinfo['face']="img/avatar.png";
         }
