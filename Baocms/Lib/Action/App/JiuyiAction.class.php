@@ -46,7 +46,7 @@ class JiuyiAction extends CommonAction
         $jiuyi = D('Jiuyi');
         $goods_id = (int)$_POST['goods_id'];
         $strike_price = (int)$_POST['strike_price']*100;
-        $auction_money = (int)$_POST['auction_money']*100;
+        $auction_money = $_POST['auction_money']*100;
 
         //竞拍商品是否存在
         $goodsdata = D('Jiuyi')->soldoutcheck($goods_id);
@@ -82,6 +82,7 @@ class JiuyiAction extends CommonAction
         }
         //将事先每期产品生成的几次能竞拍成功的次数列表第一个数给取出出队
         $periodsnum=$jiuyi->getperiodsnum($periods_id);//竞拍金额
+        //print_r($auction_money);
         if($auction_money != $periodsnum){
             $info['type']=5;
             $info['remark']='竞拍金额不对!';
