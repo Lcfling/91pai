@@ -156,7 +156,7 @@ class JiuyiModel extends CommonModel{
         $Periods = D('Periods');
         $goods =D('Goods');
         unset($data['id']);
-        if($goodsdata['inventory_num']>=1){
+        //if($goodsdata['inventory_num']>=1){
             //获取该商品的最大期数
             $num = Cac()->get('jiuyi_periods_num_'.$data['goods_id']);
             $periods_maxnum = $num + 1 ;
@@ -171,7 +171,7 @@ class JiuyiModel extends CommonModel{
             $goodsdata['inventory_num'] = $goodsdata['inventory_num']-1;
             $goods->where(array('id'=>$data['goods_id']))->field('inventory_num')->save($goodsdata);
             Cac()->set('jiuyi_auction_'.$data['goods_id'],serialize($goodsdata));
-        }
+        //}
 
     }
 
