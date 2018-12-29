@@ -243,7 +243,7 @@ class JiuyiAction extends CommonAction
             ->select();
         //重新修改数组数据
         $auctionrecorddata = array_map(function($value){
-            $value['creatime'] = date('Y/m/d/H:i',$value['creatime']);
+            $value['creatime'] = date('m/d/H:i',$value['creatime']);
             return $data[] =$value;}, $auctionrecord);
 //        //期数里面的数据
 //        $periodsdata = D('Periods a')
@@ -296,7 +296,7 @@ class JiuyiAction extends CommonAction
             ->field('a.periods_num,b.goods_name,a.ship_status,a.creatime')
             ->select();
         $periodsdatas = array_map(function($value){
-            $value['creatime'] = date('Y/m/d/H:i',$value['creatime']);
+            $value['creatime'] = date('m/d/H:i',$value['creatime']);
             return $data[] =$value;}, $periodsdata);
         $data['current']=$Page->currentPage();
         $data['list']=$periodsdatas;
