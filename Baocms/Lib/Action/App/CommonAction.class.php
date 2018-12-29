@@ -12,6 +12,7 @@ class CommonAction extends BaseAction {
     //初始化 验证登陆信息 开启跨域
     protected function _initialize()
     {
+        
         //$this->initCache();
         header("Access-Control-Allow-Origin: *"); // 允许任意域名发起的跨域请求
         header('Access-Control-Allow-Methods:GET, POST');

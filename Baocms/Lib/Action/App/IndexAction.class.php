@@ -20,9 +20,9 @@ class IndexAction extends CommonAction
                 'img'=>'img/game2.png'
             ),
             2=>array(
-                'title'=>'二八杠',
-                'game'=>'erba',
-                'img'=>'img/game3.png'
+                'title'=>'胜者为王',
+                'game'=>'szww',
+                'img'=>'img/game4.png'
             )
         );
         $this->ajaxReturn($data,'success',1);
@@ -456,7 +456,7 @@ class IndexAction extends CommonAction
         $data['force']='1';
         $data['detail']='版本更新信息';
         $data['url']='https://myappdownload.oss-cn-beijing.aliyuncs.com/dark3.1.1.apk';
-        if($v=="3.1.1"){
+        if($v=="3.2.0"){
             $this->ajaxReturn(null,'最新版本',0);
         }else{
             $this->ajaxReturn($data,'版本更新',1);

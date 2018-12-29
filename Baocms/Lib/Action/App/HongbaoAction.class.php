@@ -23,7 +23,6 @@ class HongbaoAction extends CommonAction
         $userInfo=D('Users')->getUserByUid($hongbao_info['user_id']);
         $hongbao_info['username']=$userInfo['nickname'];
 
-        Cac()->set('alluserin',count(Gateway::getAllClientInfo()));
         if($hongbao_info['creatime']<time()-180){
             $hongbao_info['type']=2;
             $hongbao_info['remark']='红包过期';
@@ -326,7 +325,7 @@ class HongbaoAction extends CommonAction
     private function awordnotify($hb,$userinfo,$aword,$type){
         //中奖判断  全局通知
         //1.领包通知
-        Gateway::$registerAddress = '127.0.0.1:1238';
+        Gateway::$registerAddress = '116.140.34.55:1238';
         $data=array(
             'roomid'=>$hb['roomid'],
             'm'=>2,
@@ -345,7 +344,7 @@ class HongbaoAction extends CommonAction
     }
     private function sendnotify($hb,$userinfo)
     {
-        Gateway::$registerAddress = '127.0.0.1:1238';
+        Gateway::$registerAddress = '116.140.34.55:1238';
         if($userinfo['face']==''){
             $userinfo['face']="img/avatar.png";
         }
@@ -375,7 +374,7 @@ class HongbaoAction extends CommonAction
     //红包倍领取通知
 
     private function benotify($hb,$userinfo){
-        Gateway::$registerAddress = '127.0.0.1:1238';
+        Gateway::$registerAddress = '116.140.34.55:1238';
         if($userinfo['face']==''){
             $userinfo['face']="img/avatar.png";
         }
