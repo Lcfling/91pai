@@ -130,16 +130,16 @@ class JiuyiAction extends CommonAction
      * @param auction_money 每次竞拍金额
      * @return
      */
-//    public function addgoods(){
-//
-//        //创建库存-3
-//        $data['goods_name']='测试商品';$data['goods_header']='测试商品测试商品测试商品测试商品测试商品';$data['goods_img']='图片';$data['strike_price']='15000';$data['auction_price']='5000';
-//        $data['buyback_price']='2000';$data['auction_num']='10';$data['inventory_num']='100';$data['sold_out']='1';$data['creatime']=time();
-//        //D('Jiuyi')->creategoods($data);
-//        print_r(unserialize(Cac()->get('jiuyi_auction_43')));
-//        print_r(Cac()->get('jiuyi_periods_num_43'));
-//        print_r(Cac()->lrange('jiuyi_auction_list_74',0,-1));
-//    }
+    public function addgoods(){
+
+        //创建库存-3
+        $data['goods_name']='测试商品';$data['goods_header']='测试商品测试商品测试商品测试商品测试商品';$data['goods_img']='图片';$data['strike_price']='15000';$data['auction_price']='5000';
+        $data['buyback_price']='2000';$data['auction_num']='10';$data['inventory_num']='100';$data['sold_out']='1';$data['creatime']=time();
+        //D('Jiuyi')->creategoods($data);
+        print_r(unserialize(Cac()->get('jiuyi_auction_43')));
+        print_r(Cac()->get('jiuyi_periods_num_43'));
+        print_r(Cac()->lrange('jiuyi_auction_list_175',0,-1));
+    }
     /**竞拍成功商品期数展示详细
      * @param goods_id 商品id
      * @return
@@ -223,7 +223,7 @@ class JiuyiAction extends CommonAction
     /**查看竞拍记录之收益情况
      *
      */
-        public function checkauctionproceeds() {
+    public function checkauctionproceeds() {
         //收益价格 期数 产品 回购或者发货情况 时间
         $uid = $this->uid;
         $_GET['p']=(int)$_POST['p'];
@@ -318,7 +318,7 @@ class JiuyiAction extends CommonAction
         if($userperiods){
             foreach ($userperiods as &$v){
                 if($v['ship_status'] == 0 ){
-                    $goodsdata = unserialize( Cac()->get('jiuyi_auction_'.$v['goods_id'])) ;
+                    $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$v['goods_id'])) ;
                     //获取用户信息
                     $userinfo = $users->getUserByUid($this->uid);
                     if($userinfo['vip']==1){
@@ -355,7 +355,7 @@ class JiuyiAction extends CommonAction
         //获取该期数的商品竞拍详情
         $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
         //获取商品的信息
-        $goodsdata = unserialize( Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
+        $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
 
 
         $data=array(
@@ -409,7 +409,7 @@ class JiuyiAction extends CommonAction
         $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
         //print_r($periodslist);
         //获取商品的信息
-        $goodsdata = unserialize( Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
+        $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
 
         $data=array(
             'user_id'=>$this->uid,
