@@ -172,7 +172,8 @@ class SzwwsendModel extends CommonModel{
             if($k==0){
                 $data['user_id']=0;
                 $data["hb_id"]=$hongbao_info['id'];
-                $data["is_robot"]=1;//是否是机器人？
+                $data["is_banker"]=1;//是否是庄家
+                $data["is_robot"]=0;//是否是机器人？
                 $data["is_receive"]=1;//是否已经领取
                 $data["money"]=$value;
                 $data['recivetime']=time();
@@ -183,6 +184,7 @@ class SzwwsendModel extends CommonModel{
             }else{
                 $data['user_id']=0;
                 $data["hb_id"]=$hongbao_info['id'];
+                $data["is_banker"]=0;//是否是庄家
                 $data["is_robot"]=0;
                 $data["is_receive"]=0;
                 $data["money"]=$value;
@@ -300,7 +302,7 @@ class SzwwsendModel extends CommonModel{
         $szwwget = D('Szwwget');
         $users =   D('Users');
         $hb_id = $hb['id'];
-        $zjmoney = $szwwget->where(array('hb_id'=>$hb_id,'is_robot'=>1))->getField('money');
+        $zjmoney = $szwwget->where(array('hb_id'=>$hb_id,'is_banker'=>1))->getField('money');
         $getmoneytotal = $szwwget->where("hb_id = $hb_id and user_id > 0")->sum('paymoney');
         $data = $this->timergetkicklist($hb_id,$hb['user_id']);
         $userInfo=$users->getUserByUid($hb['user_id']);
@@ -352,7 +354,7 @@ class SzwwsendModel extends CommonModel{
         $szwwget = D("Szwwget");
         $status = $this->judgezjkickstatus($hongbao_id,$uid);
         if($status == 0){
-            $kickid = $szwwget->where(array('hb_id'=>$hongbao_id,'is_robot'=>1))->getField('id');
+            $kickid = $szwwget->where(array('hb_id'=>$hongbao_id,'is_banker'=>1))->getField('id');
             $szwwget->where(array('id'=>$kickid))->field('user_id')->save(array('user_id'=>$uid));
             $zjkicklist = $szwwget->where(array('id'=>$kickid))->find();
             Cac()->set('szwwget_id_'.$kickid,serialize($zjkicklist));
