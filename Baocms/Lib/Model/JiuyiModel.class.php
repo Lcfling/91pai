@@ -143,7 +143,7 @@ class JiuyiModel extends CommonModel{
         Cac()->rPush('jiuyi_auction_periods_'.$data['goods_id'],$periods_id);
     }
 
-    /**生成一个新的期数 并查看库存，库存-1
+    /**生成一个新的期数 旧：并查看库存，库存-1 新：成交次数+1
      * @param periods_id 期数id
      * @return
      */
@@ -168,7 +168,7 @@ class JiuyiModel extends CommonModel{
             for($j = 0;$j<$goodsdata['auction_num'];$j++){
                 Cac()->rPush('jiuyi_auction_list_'.$periodsid,$auction_money);
             }
-            $goodsdata['inventory_num'] = $goodsdata['inventory_num']-1;
+            $goodsdata['inventory_num'] = $goodsdata['inventory_num']+1;
             $goods->where(array('id'=>$data['goods_id']))->field('inventory_num')->save($goodsdata);
             Cac()->set('jiuyi_auction_'.$data['goods_id'],serialize($goodsdata));
         //}
