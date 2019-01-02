@@ -50,7 +50,7 @@ class JiuyiModel extends CommonModel{
      */
     public function auctioncheck($periods_id){
         $status =0;
-        $periodsdata=  Cac()->get('jiuyi_auction_success_'.$periods_id);
+        $periodsdata= unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
         if($periodsdata){
             if($periodsdata['is_auction']== 1){
                 $status = 1;
