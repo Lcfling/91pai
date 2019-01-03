@@ -11,7 +11,7 @@ class SzwwTimerAction extends Action{
     public function  zjgethongbao(){
        $data =  $_GET;
        if($data['token']=='3acf16259def65456fc2a68ab5e10d96'){
-           //echo "进入定时器";
+           //echo "进入定时器";exit();
            $szwwsend = D("Szwwsend");
            //获取该房间未结束的红包
             $unfinishedlist =  $szwwsend->where(array("roomid"=>$data['roomid'],'is_freeze'=>0))->select();
@@ -49,6 +49,221 @@ class SzwwTimerAction extends Action{
        }
 
     }
+    /**胜者为王机器人开始发包
+     * @param $money 发的钱
+     * @param $num 红包数量
+     * @param $user_id 用户id
+     * @param $creatime 创建时间
+     * @param $roomid 房间号
+     */
+    public function szwwrobotsend(){
+        //money 以分为单位 所以获取到要*100
+        //$enres =  $this->AESEncryptRequest('abcd','szww');
+        //xenRosorxXQ8WA+YdEwX1w==
+        //post 或者get过来的数据需要处理一下，防止base64加密乱码
+        $datas =  $encodedData = str_replace(' ','+',$_GET['code']);;
+        $enres =$this->AESDecryptResponse('abcd',$datas);
+        if($enres == 'szww'){
+
+            $money = rand(20,100)*100;
+            $num = 4;
+            $roomid = '3735278';
+            $hongbaomoney = 88*$num;
+            //含冻结金额，不翻倍
+            $freezemoney = $money*($num-1);
+            $totalmoney = $hongbaomoney +$freezemoney;
+            $users =   D('Users');
+            $szwwsend = D("Szwwsend");
+
+            //加锁
+            $nostr=time().rand_string(6,1);
+            if(!$szwwsend->qsendbaoLock($this->uid,$nostr)){
+                $this->ajaxReturn('','频繁操作',0);
+            }
+            $roomData=D('Room')->getRoomData($roomid);
+            if(empty($roomData)){
+                $szwwsend->opensendbaoLock($this->uid);
+                $this->ajaxReturn('','房间不存在!',0);
+            }
+
+            //生成红包
+            $hongbao_info=$this->createhongbao($money,$hongbaomoney,$num,$roomid,$this->uid);
+            if($hongbao_info){
+                //解锁
+                $szwwsend->opensendbaoLock($this->uid);
+                //将发红包的冻结金额存表
+                D('Users')->reducemoney($this->uid,$hongbaomoney,70,1,'机器人发送红包（胜者）');
+                D('Users')->reducemoney($this->uid,$freezemoney,71,1,'机器人发包冻结（胜者）');
+                //通知
+                $this->sendnotify($hongbao_info,$this->member);
+                $this->ajaxReturn('','发送完毕!',1);
+            }else{
+                $szwwsend->opensendbaoLock($this->uid);
+
+                $this->ajaxReturn('','红包发送失败！',0);
+            }
+        }else{
+            die('蛇皮，让你蛇皮！');
+        }
+
+
+
+    }
+    /**发包调用
+     * @param $money 红包金额
+     * @param $uid 用户id
+     * @param $roomid 房间号
+     * @param $num 红包数量
+     */
+    private function createhongbao($money,$hongbaomoney,$num,$roomid,$uid){
+        $token=md5('szww_'.genRandomString(6).time().$uid);
+
+        $data=array();
+        $data['token']=$token;
+        $data['money']=$money;
+        $data['num']=$num;
+        $data['roomid']=$roomid;
+        $data['user_id']=$uid;
+        $data['is_over']=0;
+        $data['overtime']=0;
+        $data['creatime']=time();
+        D('Szwwsend')->add($data);//大红包添加完毕
+
+        //取出红包加入缓存
+        $hongbao_info=D('Szwwsend')->where(array('token'=>$token))->find();
+
+        if(empty($hongbao_info)){
+            return false;
+        }
+        print_r($hongbaomoney.'/'.$num);
+
+        //将大红包存入redis
+        Cac()->set('szww_send_'.$hongbao_info['id'],serialize($hongbao_info));
+        //根据金额
+        $kickarr=$this->getkicklist($hongbaomoney,$num);
+        $second_key = $this->di_er_da($kickarr);
+        print_r($kickarr);
+        print_r($second_key);
+        //小红包入库
+        foreach($kickarr as $k=>$value){
+            if($k==$second_key){
+                $data['user_id']=0;
+                $data["hb_id"]=$hongbao_info['id'];
+                $data["is_banker"]=1;//是否是庄家
+                $data["is_robot"]=0;//是否是机器人？
+                $data["is_receive"]=1;//是否已经领取
+                $data["money"]=$value;
+                $data['recivetime']=time();
+                $data["creatime"]=time();
+                D('szwwget')->add($data);
+
+            }else{
+                $data['user_id']=0;
+                $data["hb_id"]=$hongbao_info['id'];
+                $data["is_banker"]=0;//是否是庄家
+                $data["is_robot"]=0;
+                $data["is_receive"]=0;
+                $data["money"]=$value;
+                $data['recivetime']=0;
+                $data["creatime"]=time();
+                D('szwwget')->add($data);
+            }
+        }
+        //获取小红包
+        $new_kicklist=D('szwwget')->where(array('hb_id'=>$hongbao_info['id']))->select();
+
+        foreach ($new_kicklist as $k=>$v){
+            if($v['is_receive']==0){
+                Cac()->rPush('szwwget_queue_'.$hongbao_info['id'],$v['id']);
+                Cac()->rPush('szwwget_queue_back_'.$hongbao_info['id'],$v['id']);//复制一条队列  用于遍历数据
+                Cac()->set('szwwget_id_'.$v['id'],serialize($v));
+            }else{
+                Cac()->lPush('szwwget_queue_back_'.$hongbao_info['id'],$v['id']);//复制一条队列  用于遍历数据
+                Cac()->set('szwwget_id_'.$v['id'],serialize($v));
+            }
+
+        }
+
+        $len=Cac()->lLen('szwwget_queue_'.$hongbao_info['id']);
+        if($len==$num-1){
+            return $hongbao_info;
+        }else{
+            return false;
+        }
+
+    }
+
+    function di_er_da($arr){
+        $arr = array_diff($arr,array(max($arr)));
+        $second_key = array_search(max($arr),$arr);
+        return $second_key;
+    }
+
+    /**红包分几个小包
+     * @param $money 总钱数 单位：分
+     * @param $num 小包数量
+     * @return $money_arr 数组
+     */
+    private function getkicklist($money,$num){
+        $totle=$money;
+        if($num>1){
+            $nums_arr=array();
+
+            while (count($nums_arr)<$num-1){
+                $point=rand(1,$totle-1);
+                while(in_array($point,$nums_arr)){
+                    $point=rand(1,$totle-1);
+                }
+                $nums_arr[]=$point;
+            }
+            arsort($nums_arr);
+        }else{
+            $nums_arr[]=0;
+        }
+        $maxkey=$totle;
+        $money_arr=array();
+        foreach($nums_arr as $k=>$value){
+            $money_arr[]=$maxkey-$value;
+            $maxkey=$value;
+        }
+        if($num>1){
+            $money_arr[]=$maxkey;
+        }
+        return $money_arr;
+    }
+    /**胜者为王机器人发包全局通知
+     * @param $hb 大红包信息
+     * @param $userinfo 用户信息
+
+     */
+    private function sendnotify($hb,$userinfo)
+    {
+        Gateway::$registerAddress = '116.140.34.55:1238';
+        if($userinfo['face']==''){
+            $userinfo['face']="img/avatar.png";
+        }
+        $data=array(
+            'roomid'=>$hb['roomid'],
+            'm'=>5,
+            'data'=>array(
+                'username'=>$userinfo['nickname'],
+                'user_id'=>$userinfo['user_id'],
+                'avatar'=>$userinfo['face'],
+                'hongbao_id'=>$hb['id'],
+                'money'=>$hb['money'],
+                'overtime'=>null,
+                'creatime'=>$hb['creatime'],
+                'num'=>$hb['num'],
+                'token'=>$hb['token'],
+                'is_over'=>0,
+                'is_freeze'=>0,
+            )
+        );
+        $data=json_encode($data);
+        Gateway::sendToAll($data);
+    }
+
+
 
     /**庄家发的红包的剩余金额和冻结金额的返还
      * @param $hbinfo 大红包信息
@@ -148,7 +363,60 @@ class SzwwTimerAction extends Action{
     }
 
 
+    /**
+     * 通过AES加密请求数据
+     *
+     * @param array $query
+     * @return string
+     */
+    private function AESEncryptRequest($encryptKey, $query){
+        return $this->encrypt_pass($query,$encryptKey);
 
+    }
+    // 加密
+    private function encrypt_pass($input, $key) {
+        $size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+        $input = $this->pkcs5_pad($input, $size);
+        $td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
+        $iv = '0102030405060708';
+        mcrypt_generic_init($td, $key, $iv);
+        $data = mcrypt_generic($td, $input);
+        mcrypt_generic_deinit($td);
+        mcrypt_module_close($td);
+        $data = base64_encode($data);
+        return $data;
+    }
+    //填充
+    private function pkcs5_pad ($text, $blocksize) {
+        $pad = $blocksize - (strlen($text) % $blocksize);
+        return $text . str_repeat(chr($pad), $pad);
+    }
+
+    /**
+     * 通过AES解密请求数据
+     *
+     * @param array $query
+     * @return string
+     */
+    private function AESDecryptResponse($encryptKey,$data){
+        return $this->decrypt_pass($data,$encryptKey);
+    }
+    // 解密
+    private function decrypt_pass($sStr, $sKey) {
+
+        $iv = '0102030405060708';
+        $decrypted= mcrypt_decrypt(
+            MCRYPT_RIJNDAEL_128,
+            $sKey,
+            base64_decode($sStr),
+            MCRYPT_MODE_CBC,
+            $iv
+        );
+        $dec_s = strlen($decrypted);
+        $padding = ord($decrypted[$dec_s-1]);
+        $decrypted = substr($decrypted, 0, -$padding);
+        return $decrypted;
+    }
 
 
 
