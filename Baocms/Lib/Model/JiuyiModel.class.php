@@ -50,7 +50,7 @@ class JiuyiModel extends CommonModel{
      */
     public function auctioncheck($periods_id){
         $status =0;
-        $periodsdata=  Cac()->get('jiuyi_auction_success_'.$periods_id);
+        $periodsdata= unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
         if($periodsdata){
             if($periodsdata['is_auction']== 1){
                 $status = 1;
@@ -143,7 +143,7 @@ class JiuyiModel extends CommonModel{
         Cac()->rPush('jiuyi_auction_periods_'.$data['goods_id'],$periods_id);
     }
 
-    /**生成一个新的期数 并查看库存，库存-1
+    /**生成一个新的期数 旧：并查看库存，库存-1 新：成交次数+1
      * @param periods_id 期数id
      * @return
      */
@@ -156,7 +156,7 @@ class JiuyiModel extends CommonModel{
         $Periods = D('Periods');
         $goods =D('Goods');
         unset($data['id']);
-        if($goodsdata['inventory_num']>=1){
+        //if($goodsdata['inventory_num']>=1){
             //获取该商品的最大期数
             $num = Cac()->get('jiuyi_periods_num_'.$data['goods_id']);
             $periods_maxnum = $num + 1 ;
@@ -168,10 +168,10 @@ class JiuyiModel extends CommonModel{
             for($j = 0;$j<$goodsdata['auction_num'];$j++){
                 Cac()->rPush('jiuyi_auction_list_'.$periodsid,$auction_money);
             }
-            $goodsdata['inventory_num'] = $goodsdata['inventory_num']-1;
+            $goodsdata['inventory_num'] = $goodsdata['inventory_num']+1;
             $goods->where(array('id'=>$data['goods_id']))->field('inventory_num')->save($goodsdata);
             Cac()->set('jiuyi_auction_'.$data['goods_id'],serialize($goodsdata));
-        }
+        //}
 
     }
 
