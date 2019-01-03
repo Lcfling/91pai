@@ -132,7 +132,6 @@ class SzwwAction extends CommonAction{
         }
         if($hongbao_info['creatime']<time()-60){
             $this->ajaxReturn('','红包过期!',1);
-
         }
         if($szwwsend->isfinish($hongbao_id)){
             $this->ajaxReturn('','红包已经领取完毕!',1);
@@ -255,8 +254,6 @@ class SzwwAction extends CommonAction{
             $res['is_selfin']=0;
             $res['selfmoney']=0;
         }
-
-
         $res['hongbao_id']=$hongbao_id;
         $res['username']=$hbUser['nickname'];
         $res['avatar']=$hbUser['face'];
@@ -270,14 +267,12 @@ class SzwwAction extends CommonAction{
         $res['list']=$kickList['list'];
         foreach ($res['list'] as &$v){
             $v['recivetime']=date('H:i:s',$v['recivetime']);
-
             $userTemp=D('Users')->getUserByUid($v['user_id']);
             $v['username']=$userTemp['nickname'];
             $v['avatar']=$userTemp['face'];
             if($v['avatar']==""){
                 $v['avatar']="img/avatar.png";
             }
-
         }
 
         if($timeout==0&&$finish==0&&$recived==0&&$hongbao_info['user_id']!=$this->uid){
