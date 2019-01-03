@@ -1,5 +1,7 @@
 <?php
+require_once LIB_PATH.'/GatewayClient/Gateway.php';
 
+use GatewayClient\Gateway;
 
 class SzwwTimerAction extends Action{
 
@@ -60,9 +62,11 @@ class SzwwTimerAction extends Action{
         //money 以分为单位 所以获取到要*100
         //$enres =  $this->AESEncryptRequest('abcd','szww');
         //xenRosorxXQ8WA+YdEwX1w==
+        $this->uid = 100;
         //post 或者get过来的数据需要处理一下，防止base64加密乱码
         $datas =  $encodedData = str_replace(' ','+',$_GET['code']);;
         $enres =$this->AESDecryptResponse('abcd',$datas);
+
         if($enres == 'szww'){
 
             $money = rand(20,100)*100;
@@ -140,16 +144,15 @@ class SzwwTimerAction extends Action{
         Cac()->set('szww_send_'.$hongbao_info['id'],serialize($hongbao_info));
         //根据金额
         $kickarr=$this->getkicklist($hongbaomoney,$num);
+        //获取数组第二大
         $second_key = $this->di_er_da($kickarr);
-        print_r($kickarr);
-        print_r($second_key);
         //小红包入库
         foreach($kickarr as $k=>$value){
             if($k==$second_key){
                 $data['user_id']=0;
                 $data["hb_id"]=$hongbao_info['id'];
                 $data["is_banker"]=1;//是否是庄家
-                $data["is_robot"]=0;//是否是机器人？
+                $data["is_robot"]=1;//是否是机器人？
                 $data["is_receive"]=1;//是否已经领取
                 $data["money"]=$value;
                 $data['recivetime']=time();
@@ -160,7 +163,7 @@ class SzwwTimerAction extends Action{
                 $data['user_id']=0;
                 $data["hb_id"]=$hongbao_info['id'];
                 $data["is_banker"]=0;//是否是庄家
-                $data["is_robot"]=0;
+                $data["is_robot"]=1;
                 $data["is_receive"]=0;
                 $data["money"]=$value;
                 $data['recivetime']=0;
