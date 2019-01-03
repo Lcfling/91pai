@@ -80,7 +80,6 @@ class SzwwAction extends CommonAction{
      */
 
     public function clickszwwback(){
-        //$hongbao_id = '1';
         $hongbao_id=(int)$_POST['hongbao_id'];
         $users =   D('Users');
         $szwwsend = D("Szwwsend");
