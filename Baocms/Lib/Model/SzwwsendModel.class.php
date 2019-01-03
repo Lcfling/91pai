@@ -119,20 +119,27 @@ class SzwwsendModel extends CommonModel{
         $list=array();
         $nums=0;
         $money=0;
+        $check=1;
         $numsArr=Cac()->lRange('szwwget_queue_back_'.$hongbao_id,0,-1);
         foreach ($numsArr as $v){
             $tempArr=array();
             $tempArr=$this->getkickInfo($v);
-            if($tempArr['user_id']>0 && $tempArr['is_receive']==1){
+            if($tempArr['user_id']>0 || $tempArr['is_receive']==1){
                 $nums++;
                 if($uid>0&&$tempArr['user_id']==$uid){
                     $money=$tempArr['money'];
+                    if($tempArr['is_receive']==0){
+                        $tempArr['is_receive']='1';
+                        Cac()->set('szwwget_id_'.$tempArr['id'],serialize($tempArr));
+                        $check=0;
+                    }
                 }
                 $list[]=$tempArr;
             }
         }
         $res['num']=$nums;
         $res['money']=$money;
+        $res['check']=$check;
         $res['list']=$list;
         return $res;
     }
@@ -448,8 +455,9 @@ class SzwwsendModel extends CommonModel{
     public function setkickbackCacheOver($kickback_id,$uid){
         $ts=unserialize(Cac()->get('szwwget_id_'.$kickback_id));
         if(!empty($ts)){
-            $ts =  D('Szwwget')->where(array('id'=>$kickback_id))->find();
 
+            $ts['user_id']=$uid;
+            $ts['recivetime']=time();
             Cac()->set('szwwget_id_'.$kickback_id,serialize($ts));
             return true;
         }else{

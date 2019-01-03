@@ -41,7 +41,9 @@ class SzwwAction extends CommonAction{
         //金额判断
         if($money>$roomData['conf_max']||$money<$roomData['conf_min']){
             $szwwsend->opensendbaoLock($this->uid);
-            $this->ajaxReturn('','请选择正确的金额 '.$roomData['conf_min'].'-'.$roomData['conf_max'],0);
+            $min =$roomData['conf_min']/100;
+            $max =$roomData['conf_max']/100;
+            $this->ajaxReturn('','请选择正确的金额 '.$min.'-'.$max,0);
         }
         //红包个数判断
         if($num>100||$num<4){
@@ -80,7 +82,6 @@ class SzwwAction extends CommonAction{
      */
 
     public function clickszwwback(){
-        //$hongbao_id = '1';
         $hongbao_id=(int)$_POST['hongbao_id'];
         $users =   D('Users');
         $szwwsend = D("Szwwsend");
@@ -215,7 +216,6 @@ class SzwwAction extends CommonAction{
 
     /**红包详情
      * @param $hongbao_id 大红包id
-     *
      *
      */
     public function getrecivelist(){
@@ -426,6 +426,27 @@ class SzwwAction extends CommonAction{
         );
         $data=json_encode($data);
         Gateway::sendToUid($userinfo['user_id'],$data);
+    }
+
+    /**默认显示10条数据
+     * @param roomid 房间号
+     */
+    public function getlist(){
+
+        $roomid=(int)$_POST['roomid'];
+        $list=D('Szwwsend')->where('roomid='.$roomid." and money < 50001")->order('id DESC')->limit(10)->select();
+        $list=array_reverse($list);
+        foreach ($list as &$value){
+            $user=D('Users')->getUserByUid($value['user_id']);
+            $value['username']=$user['nickname'];
+            $value['hongbao_id']=$value['id'];
+            if($user['face']==""){
+                $value['avatar']="img/avatar.png";
+            }else{
+                $value['avatar']=$user['face'];
+            }
+        }
+        $this->ajaxReturn($list,'请求成功roomid='.$roomid);
     }
 
 

@@ -1,15 +1,13 @@
 <?php
 class JiuyirobotAction extends Action
 {
-    /**参拍机器人
-     * @param goods_id 商品id
-     * @param strike_price 成交价格
-     * @param auction_money 参拍金额
+    /**机器人存入缓存
+     * @param
      * @return
      */
 //    public function inrobotuidredis(){
 //        Cac()->del('jiuyi_robot_uid');
-//       $robotuids = D('Users')->where(array('is_robot'=>1))->select();
+//       $robotuids = D('Users')->where(array('is_robot'=>2))->select();
 //       foreach ($robotuids as $v){
 //           Cac()->rPush('jiuyi_robot_uid',$v['user_id']);
 //       }
