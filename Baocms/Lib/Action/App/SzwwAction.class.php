@@ -6,6 +6,12 @@ require_once LIB_PATH.'/GatewayClient/Gateway.php';
 use GatewayClient\Gateway;
 
 class SzwwAction extends CommonAction{
+
+    public function aaaaaa(){
+        $kickid = $_POST['kickid'];
+        $res =unserialize(Cac()->get('szwwget_id_'.$kickid)) ;
+        print_r($res);
+    }
     /**胜者为王庄家开始发包
      * @param $money 发的钱
      * @param $num 红包数量
