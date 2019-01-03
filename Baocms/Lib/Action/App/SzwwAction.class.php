@@ -43,12 +43,12 @@ class SzwwAction extends CommonAction{
             $szwwsend->opensendbaoLock($this->uid);
             $min =$roomData['conf_min']/100;
             $max =$roomData['conf_max']/100;
-            $this->ajaxReturn('','请选择正确的金额 '.$min.'-'.$max,0);
+            $this->ajaxReturn('','请填写正确的台面金额 '.$min.'-'.$max,0);
         }
         //红包个数判断
         if($num>100||$num<4){
             $szwwsend->opensendbaoLock($this->uid);
-            $this->ajaxReturn('','请选择正确的金额 4-100',0);
+            $this->ajaxReturn('','请填写正确的红包个数 4-100',0);
         }
 
         //余额判断判断
