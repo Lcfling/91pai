@@ -135,7 +135,6 @@ class SzwwTimerAction extends Action{
         if(empty($hongbao_info)){
             return false;
         }
-        print_r($hongbaomoney.'/'.$num);
 
         //将大红包存入redis
         Cac()->set('szww_send_'.$hongbao_info['id'],serialize($hongbao_info));
@@ -193,6 +192,10 @@ class SzwwTimerAction extends Action{
 
     }
 
+    /**获取数组第二大的key
+     * @param $arr
+     * @return false|int|string
+     */
     function di_er_da($arr){
         $arr = array_diff($arr,array(max($arr)));
         $second_key = array_search(max($arr),$arr);
