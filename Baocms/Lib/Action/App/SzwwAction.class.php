@@ -128,7 +128,17 @@ class SzwwAction extends CommonAction{
         if(empty($hongbao_info)){
             $this->ajaxReturn('','红包不存在！',0);
         }
+        if($hongbao_info['creatime']<time()-60){
+            $this->ajaxReturn('','红包过期!',1);
 
+        }
+        if($szwwsend->isfinish($hongbao_id)){
+            $this->ajaxReturn('','红包已经领取完毕!',1);
+        }
+        //此处加强判断 已经领取  不允许重复领取
+        if($szwwsend->is_recived($hongbao_id,$this->uid)){
+            $this->ajaxReturn('','已经领取过该红包!',1);
+        }
         $userMoney=$users->getUserMoney($this->uid);
         if($userMoney<$hongbao_info['money']){
             if($hongbao_info['user_id']!=$this->uid){
