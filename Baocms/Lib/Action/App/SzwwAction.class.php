@@ -41,15 +41,15 @@ class SzwwAction extends CommonAction{
             $this->ajaxReturn('','房间不存在!',0);
         }
         //金额判断
-//        if($money>$roomData['conf_max']||$money<$roomData['conf_min']){
-//            $szwwsend->opensendbaoLock($this->uid);
-//            $this->ajaxReturn('','请选择正确的金额 '.$roomData['conf_min'].'-'.$roomData['conf_max'],0);
-//        }
+        if($money>$roomData['conf_max']||$money<$roomData['conf_min']){
+            $szwwsend->opensendbaoLock($this->uid);
+            $this->ajaxReturn('','请选择正确的金额 '.$roomData['conf_min'].'-'.$roomData['conf_max'],0);
+        }
         //红包个数判断
-//        if($num>100||$num<4){
-//            $szwwsend->opensendbaoLock($this->uid);
-//            $this->ajaxReturn('','请选择正确的金额 4-100',0);
-//        }
+        if($num>100||$num<4){
+            $szwwsend->opensendbaoLock($this->uid);
+            $this->ajaxReturn('','请选择正确的金额 4-100',0);
+        }
 
         //余额判断判断
         $userMoney=$users->getUserMoney($this->uid);
