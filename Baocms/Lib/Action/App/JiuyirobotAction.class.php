@@ -5,15 +5,24 @@ class JiuyirobotAction extends Action
      * @param
      * @return
      */
-    public function inrobotuidredis(){
+    //public function inrobotuidredis(){
+       // $kickid = $_POST['kickid'];
 //        Cac()->del('jiuyi_robot_uid');
 //       $robotuids = D('Users')->where(array('is_robot'=>2))->select();
 //       foreach ($robotuids as $v){
 //           Cac()->rPush('jiuyi_robot_uid',$v['user_id']);
 //       }
-       $data =  Cac()->lRange('jiuyi_robot_uid',0,-1);
-       print_r($data);
-    }
+//
+
+    //print_r($rde);
+        //       print_r($data);
+        //$data =  Cac()->lRange('jiuyi_robot_uid',0,-1);
+        //$res =Cac()->rPush('jiuyi_auction_list_'.$kickid,1000) ;
+        //$ress=Cac()->lRange('jiuyi_auction_list_'.$kickid,0,-1) ;
+//        print_r($ress);
+//        print_r($res);
+
+    //}
     /**参拍机器人
      * @param goods_id 商品id
      * @param strike_price 成交价格
@@ -35,9 +44,10 @@ class JiuyirobotAction extends Action
                 $auction_money =($goodsdata['strike_price'] - $goodsdata['auction_price'])/$goodsdata['auction_num'];
                 $min = $v['min'];
                 $max = $v['max'];
-                $this->auctiongoods($robotid,$goods_id,$auction_money,$min,$max);
                 //已抢过的机器人id再存入最后
                 $this->inrobotuid($robotid);
+                $this->auctiongoods($robotid,$goods_id,$auction_money,$min,$max);
+
             }
         }else{
             die('蛇皮，让你蛇皮!');
@@ -78,15 +88,16 @@ class JiuyirobotAction extends Action
             $info['remark']='已被竞拍!';
             $this->ajaxReturn('','已被竞拍!',0);
         }
-        //将事先每期产品生成的几次能竞拍成功的次数列表第一个数给取出出队
-        $periodsnum=$jiuyi->getperiodsnum($periods_id);//竞拍金额
-        if($auction_money != $periodsnum){
-            $info['type']=5;
-            $info['remark']='参拍金额不对!';
-            $this->ajaxReturn('','参拍金额不对!',0);
-        }
         $num = Cac()->lLen('jiuyi_auction_list_'.$periods_id);
-        if($num >=$min&& $num <=$max){
+        if($num>$min  && $num <=$max){
+            //将事先每期产品生成的几次能竞拍成功的次数列表第一个数给取出出队
+            $periodsnum=$jiuyi->getperiodsnum($periods_id);//竞拍金额
+            if($auction_money != $periodsnum){
+                $info['type']=5;
+                $info['remark']='参拍金额不对!';
+                $this->ajaxReturn('','参拍金额不对!',0);
+            }
+
 
             //参拍入队
             $jiuyi->UserQueue($uid,$periods_id);
@@ -127,6 +138,7 @@ class JiuyirobotAction extends Action
      *
      */
     private function getrobotuid(){
+
         $robotid=Cac()->lPop('jiuyi_robot_uid');
         return $robotid;
     }
