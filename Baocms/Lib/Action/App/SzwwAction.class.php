@@ -7,10 +7,6 @@ use GatewayClient\Gateway;
 
 class SzwwAction extends CommonAction{
 
-    public function aaaaaa(){
-        //$rde = Cac()->rPush('jiuyi_auction_user_'.$kickid,0,-1) ;
-
-    }
     /**胜者为王庄家开始发包
      * @param $money 发的钱
      * @param $num 红包数量
