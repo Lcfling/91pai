@@ -8,9 +8,8 @@ use GatewayClient\Gateway;
 class SzwwAction extends CommonAction{
 
     public function aaaaaa(){
-        $kickid = $_POST['kickid'];
-        $res =unserialize(Cac()->get('szwwget_id_'.$kickid)) ;
-        print_r($res);
+        //$rde = Cac()->rPush('jiuyi_auction_user_'.$kickid,0,-1) ;
+
     }
     /**胜者为王庄家开始发包
      * @param $money 发的钱
