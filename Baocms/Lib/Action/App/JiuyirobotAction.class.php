@@ -5,15 +5,15 @@ class JiuyirobotAction extends Action
      * @param
      * @return
      */
-//    public function inrobotuidredis(){
+    public function inrobotuidredis(){
 //        Cac()->del('jiuyi_robot_uid');
 //       $robotuids = D('Users')->where(array('is_robot'=>2))->select();
 //       foreach ($robotuids as $v){
 //           Cac()->rPush('jiuyi_robot_uid',$v['user_id']);
 //       }
-//       $data =  Cac()->lRange('jiuyi_robot_uid',0,-1);
-//       print_r($data);
-//    }
+       $data =  Cac()->lRange('jiuyi_robot_uid',0,-1);
+       print_r($data);
+    }
     /**参拍机器人
      * @param goods_id 商品id
      * @param strike_price 成交价格
