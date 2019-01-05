@@ -4,6 +4,37 @@ require_once LIB_PATH.'/GatewayClient/Gateway.php';
 use GatewayClient\Gateway;
 
 class SzwwTimerAction extends Action{
+    /**机器人存入缓存
+     * @param
+     * @return
+     */
+    public function inrobotuidredis(){
+//        Cac()->del('szww_robot_uid');
+//       $robotuids = D('Users')->where(array('is_robot'=>2))->select();
+//       foreach ($robotuids as $v){
+//           Cac()->rPush('szww_robot_uid',$v['user_id']);
+//       }
+
+        $data =Cac()->lRange('szww_robot_uid',0,-1);
+        print_r($data);
+
+    }
+    /**胜者为王机器人规则更新
+     * @param
+     * @return
+     */
+    public function robotsave(){
+        Cac()->del('szww_robot_num');
+        $timecha =(int)$_POST['timecha'];
+        $open =(int)$_POST['open'];
+        $robotsave = D('Szwwrobotrule')->where(array('id'=>1))->save(array('timecha'=>$timecha,'open'=>$open,'creatime'=>time()));
+        if($robotsave){
+            Cac()->rPush('szww_robot_num',$timecha);
+        }
+        $data =Cac()->lRange('szww_robot_num',0,-1);
+        print_r($data);
+
+    }
 
     /**自动给庄家领取红包 结算发给所有人
      * @param roomid 房间号
@@ -56,59 +87,78 @@ class SzwwTimerAction extends Action{
      * @param $num 红包数量
      * @param $user_id 用户id
      * @param $creatime 创建时间
-     * @param $roomid 房间号
+     * @param $roomid 房间号ssssss
      */
     public function szwwrobotsend(){
-        //money 以分为单位 所以获取到要*100
+
+        $szwwsend = D("Szwwsend");
+        $usermodel =D('Users');
         //$enres =  $this->AESEncryptRequest('abcd','szww');
         //xenRosorxXQ8WA+YdEwX1w==
-        $this->uid = 100;
         //post 或者get过来的数据需要处理一下，防止base64加密乱码
         $datas =  $encodedData = str_replace(' ','+',$_GET['code']);;
         //aes解密
         $enres =$this->AESDecryptResponse('abcd',$datas);
         if($enres == 'szww'){
+            $robotdata =D('Szwwrobotrule')->where(array('open'=>1))->find();
+            if($robotdata){
+                $sendstatus =Cac()->lLen('szww_robot_num');
+                $todaytime = time();
+                $sendtime = $robotdata['timecha']*$sendstatus + $robotdata['creatime'];
+                if($todaytime >=$sendtime){
+                    //每次新增一个用于计算时间
+                    Cac()->rPush('szww_robot_num',$robotdata['timecha']);
+                    //取出一个机器人id
+                    $robotid = $this->getrobotuid();
+                    if($robotid ==0){
+                        $this->ajaxReturn('','机器人id为空!',0);
+                    }
+                    //取出机器人id从新存入最后
+                    $this->inrobotuid($robotid);
+                    //money 以分为单位 所以获取到要*100
+                    $money = rand(20,100)*100;
+                    $num = 4;
+                    $roomid = '3735278';
+                    //红包金额
+                    $hongbaomoney = 88*$num;
+                    //冻结金额
+                    $freezemoney = $money*($num-1);
+                    //加锁
+                    $nostr=time().rand_string(6,1);
+                    if(!$szwwsend->qsendbaoLock($robotid,$nostr)){
+                        $this->ajaxReturn('','频繁操作',0);
+                    }
+                    $roomData=D('Room')->getRoomData($roomid);
+                    if(empty($roomData)){
+                        $szwwsend->opensendbaoLock($robotid);
+                        $this->ajaxReturn('','房间不存在!',0);
+                    }
 
-            $money = rand(20,100)*100;
-            $num = 4;
-            $roomid = '3735278';
-            //红包金额
-            $hongbaomoney = 88*$num;
-            //冻结金额
-            $freezemoney = $money*($num-1);
-            $szwwsend = D("Szwwsend");
-            //加锁
-            $nostr=time().rand_string(6,1);
-            if(!$szwwsend->qsendbaoLock($this->uid,$nostr)){
-                $this->ajaxReturn('','频繁操作',0);
-            }
-            $roomData=D('Room')->getRoomData($roomid);
-            if(empty($roomData)){
-                $szwwsend->opensendbaoLock($this->uid);
-                $this->ajaxReturn('','房间不存在!',0);
-            }
-
-            //生成红包
-            $hongbao_info=$this->createhongbao($money,$hongbaomoney,$num,$roomid,$this->uid);
-            if($hongbao_info){
-                //解锁
-                $szwwsend->opensendbaoLock($this->uid);
-                //将发红包的冻结金额存表
-                D('Users')->reducemoney($this->uid,$hongbaomoney,70,1,'机器人发送红包（胜者）');
-                D('Users')->reducemoney($this->uid,$freezemoney,71,1,'机器人发包冻结（胜者）');
-                //通知
-                $this->sendnotify($hongbao_info,$this->member);
-                $this->ajaxReturn('','发送完毕!',1);
+                    //生成红包
+                    $hongbao_info=$this->createhongbao($money,$hongbaomoney,$num,$roomid,$robotid);
+                    if($hongbao_info){
+                        //解锁
+                        $szwwsend->opensendbaoLock($robotid);
+                        //将发红包的冻结金额存表
+                        D('Users')->reducemoney($robotid,$hongbaomoney,70,1,'机器人发送红包（胜者）');
+                        D('Users')->reducemoney($robotid,$freezemoney,71,1,'机器人发包冻结（胜者）');
+                        $useinfo = $usermodel->getUserByUid($robotid);
+                        //通知
+                        $this->sendnotify($hongbao_info,$useinfo);
+                        $this->ajaxReturn('','发送完毕!',1);
+                    }else{
+                        $szwwsend->opensendbaoLock($robotid);
+                        $this->ajaxReturn('','红包发送失败！',0);
+                    }
+                }else{
+                    $this->ajaxReturn('','未到时间',0);
+                }
             }else{
-                $szwwsend->opensendbaoLock($this->uid);
-
-                $this->ajaxReturn('','红包发送失败！',0);
+                $this->ajaxReturn('','机器人关闭',0);
             }
         }else{
             die('蛇皮，让你蛇皮！');
         }
-
-
 
     }
     /**发包调用
@@ -242,7 +292,8 @@ class SzwwTimerAction extends Action{
      */
     private function sendnotify($hb,$userinfo)
     {
-        Gateway::$registerAddress = '116.140.34.55:1238';
+        //Gateway::$registerAddress = '116.140.34.55:1238';
+        Gateway::$registerAddress = '127.0.0.1:1238';
         if($userinfo['face']==''){
             $userinfo['face']="img/avatar.png";
         }
@@ -363,6 +414,23 @@ class SzwwTimerAction extends Action{
         $hongbao_info=$szwwsend->getInfoById($hongbao_id);
         Cac()->set('szww_send_'.$hongbao_info['id'],serialize($hongbao_info));
         return $savestatus;
+
+    }
+    /**从队列中取出一个机器人id   出队
+
+     * @return $robotid 0 或  大于0
+     *
+     */
+    private function getrobotuid(){
+
+        $robotid=Cac()->lPop('szww_robot_uid');
+        return $robotid;
+    }
+    /**将已领取的机器人id存入最后
+     * @param $robotid
+     */
+    private function inrobotuid($robotid){
+        Cac()->rPush('szww_robot_uid',$robotid);
 
     }
 
