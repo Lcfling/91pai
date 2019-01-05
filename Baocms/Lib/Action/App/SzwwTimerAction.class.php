@@ -65,20 +65,18 @@ class SzwwTimerAction extends Action{
         $this->uid = 100;
         //post 或者get过来的数据需要处理一下，防止base64加密乱码
         $datas =  $encodedData = str_replace(' ','+',$_GET['code']);;
+        //aes解密
         $enres =$this->AESDecryptResponse('abcd',$datas);
-
         if($enres == 'szww'){
 
             $money = rand(20,100)*100;
             $num = 4;
             $roomid = '3735278';
+            //红包金额
             $hongbaomoney = 88*$num;
-            //含冻结金额，不翻倍
+            //冻结金额
             $freezemoney = $money*($num-1);
-            $totalmoney = $hongbaomoney +$freezemoney;
-            $users =   D('Users');
             $szwwsend = D("Szwwsend");
-
             //加锁
             $nostr=time().rand_string(6,1);
             if(!$szwwsend->qsendbaoLock($this->uid,$nostr)){
@@ -153,7 +151,7 @@ class SzwwTimerAction extends Action{
                 $data["hb_id"]=$hongbao_info['id'];
                 $data["is_banker"]=1;//是否是庄家
                 $data["is_robot"]=1;//是否是机器人？
-                $data["is_receive"]=1;//是否已经领取
+                $data["is_receive"]=0;//是否已经领取
                 $data["money"]=$value;
                 $data['recivetime']=time();
                 $data["creatime"]=time();
@@ -175,7 +173,7 @@ class SzwwTimerAction extends Action{
         $new_kicklist=D('szwwget')->where(array('hb_id'=>$hongbao_info['id']))->select();
 
         foreach ($new_kicklist as $k=>$v){
-            if($v['is_receive']==0){
+            if($v['is_banker']==0){
                 Cac()->rPush('szwwget_queue_'.$hongbao_info['id'],$v['id']);
                 Cac()->rPush('szwwget_queue_back_'.$hongbao_info['id'],$v['id']);//复制一条队列  用于遍历数据
                 Cac()->set('szwwget_id_'.$v['id'],serialize($v));
