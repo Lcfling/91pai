@@ -14,9 +14,9 @@ class SzwwTimerAction extends Action{
 //       foreach ($robotuids as $v){
 //           Cac()->rPush('szww_robot_uid',$v['user_id']);
 //       }
-
-        $data =Cac()->lRange('szww_robot_uid',0,-1);
-        print_r($data);
+//
+//        $data =Cac()->lRange('szww_robot_uid',0,-1);
+//        print_r($data);
 
     }
     /**胜者为王机器人规则更新
@@ -24,15 +24,15 @@ class SzwwTimerAction extends Action{
      * @return
      */
     public function robotsave(){
-        Cac()->del('szww_robot_num');
-        $timecha =(int)$_POST['timecha'];
-        $open =(int)$_POST['open'];
-        $robotsave = D('Szwwrobotrule')->where(array('id'=>1))->save(array('timecha'=>$timecha,'open'=>$open,'creatime'=>time()));
-        if($robotsave){
-            Cac()->rPush('szww_robot_num',$timecha);
-        }
-        $data =Cac()->lRange('szww_robot_num',0,-1);
-        print_r($data);
+//        Cac()->del('szww_robot_num');
+//        $timecha =(int)$_POST['timecha'];
+//        $open =(int)$_POST['open'];
+//        $robotsave = D('Szwwrobotrule')->where(array('id'=>1))->save(array('timecha'=>$timecha,'open'=>$open,'creatime'=>time()));
+//        if($robotsave){
+//            Cac()->rPush('szww_robot_num',$timecha);
+//        }
+//        $data =Cac()->lRange('szww_robot_num',0,-1);
+//        print_r($data);
 
     }
 
@@ -292,8 +292,8 @@ class SzwwTimerAction extends Action{
      */
     private function sendnotify($hb,$userinfo)
     {
-        //Gateway::$registerAddress = '116.140.34.55:1238';
-        Gateway::$registerAddress = '127.0.0.1:1238';
+        Gateway::$registerAddress = '116.140.34.55:1238';
+        //Gateway::$registerAddress = '127.0.0.1:1238';
         if($userinfo['face']==''){
             $userinfo['face']="img/avatar.png";
         }
