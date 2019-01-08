@@ -4,13 +4,13 @@ require_once LIB_PATH.'/GatewayClient/Gateway.php';
 use GatewayClient\Gateway;
 
 class SzwwTimerAction extends Action{
-    /**机器人存入缓存
+    /**胜者为王机器人存入缓存
      * @param
      * @return
      */
     public function inrobotuidredis(){
 //        Cac()->del('szww_robot_uid');
-//       $robotuids = D('Users')->where(array('is_robot'=>2))->select();
+//       $robotuids = D('Users')->where(array('is_robot'=>1))->select();
 //       foreach ($robotuids as $v){
 //           Cac()->rPush('szww_robot_uid',$v['user_id']);
 //       }
