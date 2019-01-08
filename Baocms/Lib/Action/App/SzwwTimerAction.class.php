@@ -116,7 +116,7 @@ class SzwwTimerAction extends Action{
                     //取出机器人id从新存入最后
                     $this->inrobotuid($robotid);
                     //money 以分为单位 所以获取到要*100
-                    $money = rand(20,100)*100;
+                    $money = rand(20,50)*100;
                     $num = 4;
                     $roomid = '3735278';
                     //红包金额
