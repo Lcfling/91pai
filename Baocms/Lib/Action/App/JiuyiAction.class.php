@@ -1,12 +1,6 @@
 <?php
 class JiuyiAction extends CommonAction
 {
-
-    public function aaaa(){
-
-
-    }
-
     /**竞拍展示
      * @param
      * @return
