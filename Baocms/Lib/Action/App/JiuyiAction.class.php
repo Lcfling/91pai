@@ -355,6 +355,7 @@ class JiuyiAction extends CommonAction
             $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
             //获取商品的信息
             $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
+
             //加锁
             $nostr=time().rand_string(6,1);
             if(!$jiuyi->qsendbaoLock($this->uid,$nostr)){
