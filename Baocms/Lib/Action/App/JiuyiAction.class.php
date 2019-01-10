@@ -361,7 +361,6 @@ class JiuyiAction extends CommonAction
             if(!$jiuyi->qsendbaoLock($this->uid,$nostr)){
                 $this->ajaxReturn('','频繁操作',0);
             }
-
             $data=array(
                 'user_id'=>$this->uid,
                 'periods_id'=>$periods_id,
