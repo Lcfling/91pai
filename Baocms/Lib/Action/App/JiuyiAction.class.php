@@ -351,11 +351,16 @@ class JiuyiAction extends CommonAction
             $users =   D('Users');
             $huigou =D('Huigou_record');
             $jiuyi = D('Jiuyi');
+            $szwwsend =D("Szwwsend");
             //获取该期数的商品竞拍详情
             $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
             //获取商品的信息
             $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
-
+            //加锁
+            $nostr=time().rand_string(6,1);
+            if(!$szwwsend->qsendbaoLock($this->uid,$nostr)){
+                $this->ajaxReturn('','频繁操作',0);
+            }
 
             $data=array(
                 'user_id'=>$this->uid,
@@ -370,6 +375,7 @@ class JiuyiAction extends CommonAction
             //存入回购表
             $huigoustatus =  $huigou->add($data);
             if($huigoustatus){
+                $szwwsend->opensendbaoLock($this->uid);
                 //更改期数表状态
                 $jiuyi->saveperiods($periodslist,1);
                 //回购金额入paid表
@@ -377,6 +383,7 @@ class JiuyiAction extends CommonAction
 
                 $this->ajaxReturn('','回购成功!',1);
             }else{
+                $szwwsend->opensendbaoLock($this->uid);
                 $this->ajaxReturn('','回购失败!',0);
             }
         }else{
@@ -399,13 +406,22 @@ class JiuyiAction extends CommonAction
             $ship_site = $_POST['ship_site'];
             $fahuo =D('Fahuo_record');
             $jiuyi = D('Jiuyi');
+            $szwwsend =D("Szwwsend");
+            //加锁
+            $nostr=time().rand_string(6,1);
+            if(!$szwwsend->qsendbaoLock($this->uid,$nostr)){
+                $this->ajaxReturn('','频繁操作',0);
+            }
             if(empty($name)){
+                $szwwsend->opensendbaoLock($this->uid);
                 $this->ajaxReturn('','收货人姓名不能为空!',0);
             }
             if(empty($mobile)){
+                $szwwsend->opensendbaoLock($this->uid);
                 $this->ajaxReturn('','手机号码不能为空!',0);
             }
             if(empty($ship_site)){
+                $szwwsend->opensendbaoLock($this->uid);
                 $this->ajaxReturn('','收货人地址不能为空!',0);
             }
             //获取该期数的商品竞拍详情
@@ -431,11 +447,13 @@ class JiuyiAction extends CommonAction
             //存入回购表
             $huigoustatus =  $fahuo->add($data);
             if($huigoustatus){
+                $szwwsend->opensendbaoLock($this->uid);
                 //更改期数表状态
                 $jiuyi->saveperiods($periodslist,2);
 
                 $this->ajaxReturn('','提交成功!',1);
             }else{
+                $szwwsend->opensendbaoLock($this->uid);
                 $this->ajaxReturn('','提交失败!',0);
             }
         }else{
