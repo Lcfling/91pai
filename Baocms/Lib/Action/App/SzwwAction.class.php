@@ -353,6 +353,7 @@ class SzwwAction extends CommonAction{
      */
     private function sendnotify($hb,$userinfo)
     {
+
         Gateway::$registerAddress = '116.140.34.55:1238';
         if($userinfo['face']==''){
             $userinfo['face']="img/avatar.png";
