@@ -5,7 +5,6 @@ class JiuyiAction extends CommonAction
      * @param
      * @return
      */
-
     public function showauctiongoods(){
 
       $data  =  D('Jiuyi')->showauction();
@@ -46,7 +45,6 @@ class JiuyiAction extends CommonAction
         $jiuyi = D('Jiuyi');
         $goods_id = (int)$_POST['goods_id'];
         $auction_money = $_POST['auction_money']*100;
-
         //竞拍商品是否存在
         $goodsdata = D('Jiuyi')->soldoutcheck($goods_id);
         if($goodsdata['sold_out']== 0){
