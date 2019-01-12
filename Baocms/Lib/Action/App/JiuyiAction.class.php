@@ -5,6 +5,7 @@ class JiuyiAction extends CommonAction
      * @param
      * @return
      */
+
     public function showauctiongoods(){
 
       $data  =  D('Jiuyi')->showauction();
