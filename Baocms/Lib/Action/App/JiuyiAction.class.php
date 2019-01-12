@@ -132,8 +132,8 @@ class JiuyiAction extends CommonAction
         //创建库存-3
         $data['goods_name']='测试商品';$data['goods_header']='测试商品测试商品测试商品测试商品测试商品';$data['goods_img']='图片';$data['strike_price']='15000';$data['auction_price']='5000';
         $data['buyback_price']='2000';$data['auction_num']='10';$data['inventory_num']='100';$data['sold_out']='1';$data['creatime']=time();
-        //D('Jiuyi')->creategoods($data);
-        print_r(unserialize(Cac()->get('jiuyi_auction_78')));
+        D('Jiuyi')->creategoods($data);
+        //print_r(unserialize(Cac()->get('jiuyi_auction_78')));
 //        print_r(Cac()->get('jiuyi_periods_num_43'));
 //        print_r(Cac()->lrange('jiuyi_auction_list_175',0,-1));
     }
@@ -353,9 +353,6 @@ class JiuyiAction extends CommonAction
                 $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
                 //获取商品的信息
                 $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
-                if($periodslist['user_id']!=$this->uid){
-                    $this->ajaxReturn('','回购失败!',0);
-                }
                 //获取用户信息
                 $userinfo = $users->getUserByUid($this->uid);
                 if($userinfo['vip']==1){
@@ -367,6 +364,10 @@ class JiuyiAction extends CommonAction
                 $nostr=time().rand_string(6,1);
                 if(!$jiuyi->qsendbaoLock($this->uid,$nostr)){
                     $this->ajaxReturn('','频繁操作',0);
+                }
+                if($periodslist['user_id']!=$this->uid){
+                    $jiuyi->opensendbaoLock($this->uid);
+                    $this->ajaxReturn('','无权限!',0);
                 }
                 $data=array(
                     'user_id'=>$this->uid,
@@ -395,7 +396,6 @@ class JiuyiAction extends CommonAction
             }else{
             $this->ajaxReturn('','回购失败!',0);
         }
-
 
     }
     /**背包发货
@@ -434,7 +434,7 @@ class JiuyiAction extends CommonAction
             //获取商品的信息
             $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
             if($periodslist['user_id']!=$this->uid){
-                $this->ajaxReturn('','发货失败!',0);
+                $this->ajaxReturn('','无权限!',0);
             }
 
             $data=array(
