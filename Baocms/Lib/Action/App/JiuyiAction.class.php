@@ -1,15 +1,16 @@
 <?php
 class JiuyiAction extends CommonAction
 {
+
     /**竞拍展示
      * @param
      * @return
      */
     public function showauctiongoods(){
 
-        $data  =  D('Jiuyi')->showauction();
+      $data  =  D('Jiuyi')->showauction();
 
-        $this->ajaxReturn($data,'请求成功',1);
+      $this->ajaxReturn($data,'请求成功',1);
     }
 
     /**立即拍商品检测 查看商品是否下架
@@ -44,7 +45,9 @@ class JiuyiAction extends CommonAction
         $users =   D('Users');
         $jiuyi = D('Jiuyi');
         $goods_id = (int)$_POST['goods_id'];
+        $strike_price = (int)$_POST['strike_price']*100;
         $auction_money = $_POST['auction_money']*100;
+
         //竞拍商品是否存在
         $goodsdata = D('Jiuyi')->soldoutcheck($goods_id);
         if($goodsdata['sold_out']== 0){
@@ -71,11 +74,11 @@ class JiuyiAction extends CommonAction
         }
         //查看是否余额不足
         $userMoney=$users->getUserMoney($this->uid);
-        $strike_price = $goodsdata['strike_price'];
         if($userMoney<$strike_price){
             $info['type']=4;
             $info['remark']='余额不足!';
             $this->ajaxReturn('','余额不足!',0);
+
         }
         //将事先每期产品生成的几次能竞拍成功的次数列表第一个数给取出出队
         $periodsnum=$jiuyi->getperiodsnum($periods_id);//竞拍金额
@@ -132,10 +135,10 @@ class JiuyiAction extends CommonAction
         //创建库存-3
         $data['goods_name']='测试商品';$data['goods_header']='测试商品测试商品测试商品测试商品测试商品';$data['goods_img']='图片';$data['strike_price']='15000';$data['auction_price']='5000';
         $data['buyback_price']='2000';$data['auction_num']='10';$data['inventory_num']='100';$data['sold_out']='1';$data['creatime']=time();
-        D('Jiuyi')->creategoods($data);
-        //print_r(unserialize(Cac()->get('jiuyi_auction_78')));
-//        print_r(Cac()->get('jiuyi_periods_num_43'));
-//        print_r(Cac()->lrange('jiuyi_auction_list_175',0,-1));
+        //D('Jiuyi')->creategoods($data);
+        print_r(unserialize(Cac()->get('jiuyi_auction_43')));
+        print_r(Cac()->get('jiuyi_periods_num_43'));
+        print_r(Cac()->lrange('jiuyi_auction_list_175',0,-1));
     }
     /**竞拍成功商品期数展示详细
      * @param goods_id 商品id
@@ -476,7 +479,6 @@ class JiuyiAction extends CommonAction
         }else{
             $this->ajaxReturn('','提交失败!',0);
         }
-
 
     }
 

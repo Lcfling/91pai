@@ -75,7 +75,20 @@ class JiuyiModel extends CommonModel{
 
         }
     }
-
+    //队列锁
+    public function qsendbaoLock($uid,$str){
+        Cac()->rPush('jiuyibaoLock'.$uid,$str);
+        $value=Cac()->lGet('jiuyibaoLock'.$uid,0);
+        if($value==$str){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    //队列开锁
+    public function opensendbaoLock($uid){
+        Cac()->delete('jiuyibaoLock'.$uid);
+    }
 
 
     /**从队列中取出一个数   出队
