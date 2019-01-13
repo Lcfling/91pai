@@ -382,6 +382,7 @@ class JiuyiAction extends CommonAction
             }
             //end By:lcfling
 
+            
             $data=array(
                 'user_id'=>$this->uid,
                 'periods_id'=>$periods_id,
