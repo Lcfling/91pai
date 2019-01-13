@@ -1,16 +1,15 @@
 <?php
 class JiuyiAction extends CommonAction
 {
-
     /**竞拍展示
      * @param
      * @return
      */
     public function showauctiongoods(){
 
-      $data  =  D('Jiuyi')->showauction();
+        $data  =  D('Jiuyi')->showauction();
 
-      $this->ajaxReturn($data,'请求成功',1);
+        $this->ajaxReturn($data,'请求成功',1);
     }
 
     /**立即拍商品检测 查看商品是否下架
@@ -45,9 +44,7 @@ class JiuyiAction extends CommonAction
         $users =   D('Users');
         $jiuyi = D('Jiuyi');
         $goods_id = (int)$_POST['goods_id'];
-        $strike_price = (int)$_POST['strike_price']*100;
         $auction_money = $_POST['auction_money']*100;
-
         //竞拍商品是否存在
         $goodsdata = D('Jiuyi')->soldoutcheck($goods_id);
         if($goodsdata['sold_out']== 0){
@@ -74,11 +71,11 @@ class JiuyiAction extends CommonAction
         }
         //查看是否余额不足
         $userMoney=$users->getUserMoney($this->uid);
+        $strike_price = $goodsdata['strike_price'];
         if($userMoney<$strike_price){
             $info['type']=4;
             $info['remark']='余额不足!';
             $this->ajaxReturn('','余额不足!',0);
-
         }
         //将事先每期产品生成的几次能竞拍成功的次数列表第一个数给取出出队
         $periodsnum=$jiuyi->getperiodsnum($periods_id);//竞拍金额
@@ -135,10 +132,10 @@ class JiuyiAction extends CommonAction
         //创建库存-3
         $data['goods_name']='测试商品';$data['goods_header']='测试商品测试商品测试商品测试商品测试商品';$data['goods_img']='图片';$data['strike_price']='15000';$data['auction_price']='5000';
         $data['buyback_price']='2000';$data['auction_num']='10';$data['inventory_num']='100';$data['sold_out']='1';$data['creatime']=time();
-        //D('Jiuyi')->creategoods($data);
-        print_r(unserialize(Cac()->get('jiuyi_auction_43')));
-        print_r(Cac()->get('jiuyi_periods_num_43'));
-        print_r(Cac()->lrange('jiuyi_auction_list_175',0,-1));
+        D('Jiuyi')->creategoods($data);
+        //print_r(unserialize(Cac()->get('jiuyi_auction_78')));
+//        print_r(Cac()->get('jiuyi_periods_num_43'));
+//        print_r(Cac()->lrange('jiuyi_auction_list_175',0,-1));
     }
     /**竞拍成功商品期数展示详细
      * @param goods_id 商品id
@@ -346,19 +343,43 @@ class JiuyiAction extends CommonAction
      * @param periods_id 期数id
      */
     public function kickbuyback(){
+        if($_POST){
+            $periods_id = (int)$_POST['periods_id'];
+            $users =   D('Users');
+            $huigou =D('Huigou_record');
+            $jiuyi = D('Jiuyi');
 
-        $buybackmoney = (int)$_POST['buyback_price']*100;
-        $periods_id = (int)$_POST['periods_id'];
-        $users =   D('Users');
-        $huigou =D('Huigou_record');
-        $jiuyi = D('Jiuyi');
-        //获取该期数的商品竞拍详情
-        $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
-        //获取商品的信息
-        $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
+            //获取该期数的商品竞拍详情
+            $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
+            //获取商品的信息
+            $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
+            //获取用户信息
+            $userinfo = $users->getUserByUid($this->uid);
+            if($userinfo['vip']==1){
+                $buybackmoney = $goodsdata['buyback_price'];
+            }else{
+                $buybackmoney = $goodsdata['buyback_price_no'];
+            }
+            //加锁
+            $nostr=time().rand_string(6,1);
+            if(!$jiuyi->qsendbaoLock($this->uid,$nostr)){
+                $this->ajaxReturn('','频繁操作',0);
+            }
+            if($periodslist['user_id']!=$this->uid){
+                $jiuyi->opensendbaoLock($this->uid);
+                $this->ajaxReturn('','无权限!',0);
+            }
 
+            //判断商品是否已经回购 change by：lcfling
+            $perModel=D("Deriods");
+            $periodsinfo=$perModel->where("id=".$periods_id)->find();
+            if($periodsinfo["ship_status"]>0){
+                $jiuyi->opensendbaoLock($this->uid);
+                $this->ajaxReturn('','商品已经处理！',0);
+            }
+            //end By:lcfling
 
-        $data=array(
+            $data=array(
                 'user_id'=>$this->uid,
                 'periods_id'=>$periods_id,
                 'goods_id'=>$periodslist['goods_id'],
@@ -367,16 +388,21 @@ class JiuyiAction extends CommonAction
                 'goods_img'=>$goodsdata['goods_img'],
                 'money'=>$buybackmoney,
                 'creatime'=>time()
-        );
-        //存入回购表
-        $huigoustatus =  $huigou->add($data);
-        if($huigoustatus){
-            //更改期数表状态
-            $jiuyi->saveperiods($periodslist,1);
-            //回购金额入paid表
-            $users->addmoney($this->uid, $buybackmoney, 93, 1, "回购金额");
+            );
+            //存入回购表
+            $huigoustatus =  $huigou->add($data);
+            if($huigoustatus){
+                $jiuyi->opensendbaoLock($this->uid);
+                //更改期数表状态
+                $jiuyi->saveperiods($periodslist,1);
+                //回购金额入paid表
+                $users->addmoney($this->uid, $buybackmoney, 93, 1, "回购金额");
 
-            $this->ajaxReturn('','回购成功!',1);
+                $this->ajaxReturn('','回购成功!',1);
+            }else{
+                $jiuyi->opensendbaoLock($this->uid);
+                $this->ajaxReturn('','回购失败!',0);
+            }
         }else{
             $this->ajaxReturn('','回购失败!',0);
         }
@@ -389,52 +415,68 @@ class JiuyiAction extends CommonAction
      * @param ship_site 收货人地址
      */
     public function kickshipments(){
+        if($_POST){
+            $periods_id = (int)$_POST['periods_id'];
+            $name = $_POST['name'];
+            $mobile = $_POST['mobile'];
+            $ship_site = $_POST['ship_site'];
+            $fahuo =D('Fahuo_record');
+            $jiuyi = D('Jiuyi');
+            //加锁
+            $nostr=time().rand_string(6,1);
+            if(!$jiuyi->qsendbaoLock($this->uid,$nostr)){
+                $this->ajaxReturn('','频繁操作',0);
+            }
+            if(empty($name)){
+                $jiuyi->opensendbaoLock($this->uid);
+                $this->ajaxReturn('','收货人姓名不能为空!',0);
+            }
+            if(empty($mobile)){
+                $jiuyi->opensendbaoLock($this->uid);
+                $this->ajaxReturn('','手机号码不能为空!',0);
+            }
+            if(empty($ship_site)){
+                $jiuyi->opensendbaoLock($this->uid);
+                $this->ajaxReturn('','收货人地址不能为空!',0);
+            }
+            //获取该期数的商品竞拍详情
+            $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
+            //获取商品的信息
+            $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
+            if($periodslist['user_id']!=$this->uid){
+                $this->ajaxReturn('','无权限!',0);
+            }
 
-        $periods_id = (int)$_POST['periods_id'];
-        $name = $_POST['name'];
-        $mobile = $_POST['mobile'];
-        $ship_site = $_POST['ship_site'];
-        $fahuo =D('Fahuo_record');
-        $jiuyi = D('Jiuyi');
-        if(empty($name)){
-            $this->ajaxReturn('','收货人姓名不能为空!',0);
-        }
-        if(empty($mobile)){
-            $this->ajaxReturn('','手机号码不能为空!',0);
-        }
-        if(empty($ship_site)){
-            $this->ajaxReturn('','收货人地址不能为空!',0);
-        }
-        //获取该期数的商品竞拍详情
-        $periodslist  =unserialize(Cac()->get('jiuyi_auction_success_'.$periods_id));
-        //print_r($periodslist);
-        //获取商品的信息
-        $goodsdata = unserialize(Cac()->get('jiuyi_auction_'.$periodslist['goods_id'])) ;
+            $data=array(
+                'user_id'=>$this->uid,
+                'periods_id'=>$periods_id,
+                'goods_id'=>$periodslist['goods_id'],
+                'goods_name'=>$goodsdata['goods_name'],
+                'goods_header'=>$goodsdata['goods_header'],
+                'goods_img'=>$goodsdata['goods_img'],
+                'name'=>$name,
+                'mobile'=>$mobile,
+                'ship_site'=>$ship_site,
+                'tracking_no'=>0,
+                'creatime'=>time()
+            );
+            //print_r($data);
+            //存入回购表
+            $huigoustatus =  $fahuo->add($data);
+            if($huigoustatus){
+                $jiuyi->opensendbaoLock($this->uid);
+                //更改期数表状态
+                $jiuyi->saveperiods($periodslist,2);
 
-        $data=array(
-            'user_id'=>$this->uid,
-            'periods_id'=>$periods_id,
-            'goods_id'=>$periodslist['goods_id'],
-            'goods_name'=>$goodsdata['goods_name'],
-            'goods_header'=>$goodsdata['goods_header'],
-            'goods_img'=>$goodsdata['goods_img'],
-            'name'=>$name,
-            'mobile'=>$mobile,
-            'ship_site'=>$ship_site,
-            'tracking_no'=>0,
-            'creatime'=>time()
-        );
-        //print_r($data);
-        //存入回购表
-        $huigoustatus =  $fahuo->add($data);
-        if($huigoustatus){
-            //更改期数表状态
-            $jiuyi->saveperiods($periodslist,2);
-
-            $this->ajaxReturn('','提交成功!',1);
+                $this->ajaxReturn('','提交成功!',1);
+            }else{
+                $jiuyi->opensendbaoLock($this->uid);
+                $this->ajaxReturn('','提交失败!',0);
+            }
         }else{
             $this->ajaxReturn('','提交失败!',0);
         }
+
 
     }
 
