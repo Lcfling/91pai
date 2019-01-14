@@ -465,7 +465,6 @@ class JiuyiAction extends CommonAction
                 'tracking_no'=>0,
                 'creatime'=>time()
             );
-            //print_r($data);
             //存入回购表
             $huigoustatus =  $fahuo->add($data);
             if($huigoustatus){
